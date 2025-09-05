@@ -11,25 +11,22 @@ model.eval()
 
 import os
 
-# 指定静态路径（无需动态解析）
 INPUT_DIR = "/Users/susie/Desktop/Multimodal analysis of disagreement/disagreement-dataset/Transcriptions/Turn_Level_Transcripts"
 OUTPUT_DIR = "/Users/susie/Desktop/Multimodal analysis of disagreement/disagreement-dataset/Embedding/txt_embeddings"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# 平均池化函数
 def mean_pooling(last_hidden_state, attention_mask):
     mask = attention_mask.unsqueeze(-1).expand(last_hidden_state.size()).float()
     summed = torch.sum(last_hidden_state * mask, dim=1)
     summed_mask = torch.clamp(mask.sum(dim=1), min=1e-9)
     return summed / summed_mask
 
-# 遍历每个 CSV 文件
 for filename in os.listdir(INPUT_DIR):
     if filename.endswith(".csv"):
         input_path = os.path.join(INPUT_DIR, filename)
         output_path = os.path.join(OUTPUT_DIR, filename.replace(".csv", "_embedding.csv"))
         
-        df = pd.read_csv(input_path, encoding='latin-1') # 兼容非 UTF-8 编码的文件
+        df = pd.read_csv(input_path, encoding='latin-1')
         embeddings = []
 
         for text in tqdm(df['text'], desc=f"Embedding {filename}"):
